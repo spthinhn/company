@@ -1,15 +1,22 @@
-	<?php
+<!DOCTYPE html>
+<html>
+<head>
+    <?php
         foreach ($arrCSS1 as $c){
-    ?>
-        <link rel="stylesheet" href="/uplon/css/<?= $c ?>"/>
-    <?php
+            echo $this->Html->css($c);
         }
-	?>
+    ?>
+    <title>Login Page</title>
+    <style type="text/css">
+        .body{
+            background-color: blue;
+            opacity: 50%;
+        }
+    </style>
+</head>
+<body>
+
 <?= $this->fetch('content') ?>
-	<?php
-            foreach ($arrJS1 as $s) {
-    ?>
-                <script src="/uplon/js/<?= $s ?>"></script>
-    <?php
-            }
-    ?>
+   
+</body>
+</html>

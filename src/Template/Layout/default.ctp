@@ -23,15 +23,15 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
         <meta name="description" content="A fully featured admin theme which can be used to build CRM, CMS, etc.">
         <meta name="author" content="Coderthemes">
         <title>Uplon</title>
-        <link rel="shortcut icon" href="/uplon/css/images/favicon.ico">
+        <link rel="shortcut icon" href="/css/images/favicon.ico">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- CSS -->
     <?php
         foreach ($arrCSS1 as $c){
-    ?>
-        <link rel="stylesheet" href="/uplon/css/<?= $c ?>"/>
-    <?php
+
+            echo $this->Html->css($c);
+
         }
     ?>
 
@@ -120,7 +120,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                                 <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <div class="notify-icon bg-faded">
-                                        <img src="/uplon/img/users/avatar-2.jpg" alt="img" class="img-circle img-fluid">
+                                    <?php echo $this->Html->image('users/avatar-2.jpg'); ?>
                                     </div>
                                     <p class="notify-details">
                                         <b>Robert Taylor</b>
@@ -132,7 +132,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                                 <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <div class="notify-icon bg-faded">
-                                        <img src="/uplon/img/users/avatar-3.jpg" alt="img" class="img-circle img-fluid">
+                                        <?php echo $this->Html->image('users/avatar-3.jpg'); ?>
                                     </div>
                                     <p class="notify-details">
                                         <b>Carlos Crouch</b>
@@ -144,7 +144,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                                 <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <div class="notify-icon bg-faded">
-                                        <img src="/uplon/img/users/avatar-4.jpg" alt="img" class="img-circle img-fluid">
+                                    <?php echo $this->Html->image('users/avatar-4.jpg'); ?>
                                     </div>
                                     <p class="notify-details">
                                         <b>Robert Taylor</b>
@@ -170,7 +170,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                         <li class="nav-item dropdown notification-list">
                             <a class="nav-link dropdown-toggle arrow-none waves-effect waves-light nav-user" data-toggle="dropdown" href="#" role="button"
                                aria-haspopup="false" aria-expanded="false">
-                                <img src="/uplon/img/users/avatar-1.jpg" alt="user" class="img-circle">
+                               <?php echo $this->Html->image('users/avatar-1.jpg'); ?>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right dropdown-arrow profile-dropdown " aria-labelledby="Preview">
                                 <!-- item-->
@@ -382,11 +382,12 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
     </script>
     <!-- javascript -->
     <?php
-            foreach ($arrJS1 as $s) {
+        foreach ($arrJS1 as $s){
+
+            echo $this->Html->script($s);
+
+        }
     ?>
-                <script src="/uplon/js/<?= $s ?>"></script>
-    <?php
-            }
-    ?>
+   
 
 </html>
