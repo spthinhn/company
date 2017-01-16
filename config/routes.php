@@ -49,12 +49,39 @@ Router::scope('/', function (RouteBuilder $routes) {
      * its action called 'display', and we pass a param to select the view file
      * to use (in this case, src/Template/Pages/home.ctp)...
      */
-    $routes->connect('/', ['controller' => 'administrator', 'action' => 'index']);
-    $routes->connect('/login', ['controller' => 'administrator', 'action' => 'login']);
+    // $routes->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
+    // $routes->connect('/', ['controller' => 'ServerApi', 'action' => 'index']);
+    // $routes->connect('/logviewer.php', ['controller' => 'ServerApi', 'action' => 'logviewer']);
+
+
+/* Begin API Server */
+    $routes->connect('/api/v1/insertTicketByMachine', ['controller' => 'ServerApi', 'action' => 'insertTicketByMachine']);
+    $routes->connect('/api/v1/checkTicket', ['controller' => 'ServerApi', 'action' => 'checkQrcode']);
+    $routes->connect('/api/v1/checkInOutStaff', ['controller' => 'ServerApi', 'action' => 'checkInOutStaff']);
+    $routes->connect('/api/v1/updateBusPosition', ['controller' => 'ServerApi', 'action' => 'updateBusPosition']);
+    $routes->connect('/api/v1/updateDevicePosition', ['controller' => 'ServerApi', 'action' => 'updateDevicePosition']);
+/* End API Server */    
+
+/* Begin Manager */
+    $routes->connect('/administrator/users', ['controller' => 'Administrator', 'action' => 'users']);
+    $routes->connect('/administrator/user/:id', ['controller' => 'Administrator', 'action' => 'user', 'id' => '[0-9]+']);
+    $routes->connect('/administrator/users/add', ['controller' => 'Administrator', 'action' => 'addUser']);
+    
+    $routes->connect('/administrator/roles', ['controller' => 'Administrator', 'action' => 'roles']);
+    $routes->connect('/administrator/roles/add', ['controller' => 'Administrator', 'action' => 'addRole']);
+    $routes->connect('/administrator/roles/edit/:id', ['controller' => 'Administrator', 'action' => 'editRole', 'id' => '[0-9]+']);
+    $routes->connect('/administrator/roles/delete/:id', ['controller' => 'Administrator', 'action' => 'deleteRole', 'id' => '[0-9]+']);
+/* End Manager */
+
+/* Begin Staffs */
+    $routes->connect('/administrator/staffs', ['controller' => 'Staffs', 'action' => 'index']);
+    $routes->connect('/administrator/staff/:id', ['controller' => 'Staffs', 'action' => 'user', 'id' => '[0-9]+']);
+/* End Staffs */
 
     /**
      * ...and connect the rest of 'Pages' controller's URLs.
      */
+    // $routes->connect('/pages/*', ['controller' => 'Pages', 'action' => 'display']);
 
     /**
      * Connect catchall routes for all controllers.

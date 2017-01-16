@@ -25,9 +25,18 @@
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card-box">
-
-                        <h4 class="m-t-0 header-title"><b>Thành viên</b></h4>
-
+                        <div class="col-sm-8">
+                            <h4 class="m-t-0 header-title"><b>Members</b></h4>
+                        </div>
+                        <div class="col-sm-4">
+                            <a href="<?php echo $this->Url->build(array('controller'=>'Administrator','action'=>'addUser')) ?>">
+                                <button class="btn waves-effect waves-light btn-default btn-sm pull-right">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
                         <table class="tablesaw table m-b-0 table-bordered table-hover" data-tablesaw-sortable >
                             <thead>
                                 <tr>

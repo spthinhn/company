@@ -64,7 +64,7 @@ return [
      *   You should treat it as extremely sensitive data.
      */
     'Security' => [
-        'salt' => env('SECURITY_SALT', '8f502475c5506177b86eef2c5735dc936f7ca94216c50f9f5236809157d9370b'),
+        'salt' => env('SECURITY_SALT', '__SALT__'),
     ],
 
     /**
@@ -229,9 +229,9 @@ return [
              * the following line and set the port accordingly
              */
             //'port' => 'non_standard_port_number',
-            'username' => 'my_app',
-            'password' => 'secret',
-            'database' => 'my_app',
+            'username' => 'focusnguyen_bus',
+            'password' => 'focusnguyen_bus',
+            'database' => 'focusnguyen_bus',
             'encoding' => 'utf8',
             'timezone' => 'UTC',
             'flags' => [],
