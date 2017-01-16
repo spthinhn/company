@@ -57,7 +57,7 @@ class ServerApiController extends AppController
             $params = $this->cutQrcode($data['qrcode']);
             $params['qrcode'] = $data['qrcode'];
             $flag = $this->insertTicket($params);
-
+            
             $arrUpdate['nameTable'] = "portable_machines";
             $arrUpdate['id'] = $params['id'];
             $arrUpdate['latitude'] = $data['latitude'];
@@ -163,9 +163,22 @@ class ServerApiController extends AppController
     {
         $table = TableRegistry::get('buses');
         $entity = $table->get($data['id']);
-        $entity->longtitude = $data['longtitude'];
-        $entity->latitude = $data['latitude'];
-        $table->save($entity);
+        if (is_numeric($data['longtitude'])) {
+            $entity->longtitude = str_replace(",","",$data['longtitude']);
+        } else {
+            $entity->longtitude = $entity->longtitude;
+        }
+        if (is_numeric($data['latitude'])) {
+            $entity->latitude = str_replace(",","",$data['latitude']);
+        } else {
+            $entity->latitude = $entity->latitude;
+        }
+        if ($table->save($entity)) {
+            return true;
+        } else {
+            $result['status'] = false;
+            die(json_encode($result));
+        }
     }
 
     private function getIdStaff($data)
@@ -225,6 +238,18 @@ class ServerApiController extends AppController
 
     private function insertTicket($params)
     {
+        $busesTable = TableRegistry::get('buses');
+        $ticketPriceTable = TableRegistry::get('ticket_types');
+        $busTicketsTable  = TableRegistry::get('bus_tickets');
+        $portableMachinesTable = TableRegistry::get('portable_machines');
+
+        $countTicketPrice = $ticketPriceTable->find()->where(['id' => $params['tt']])->count();
+        if ($countTicketPrice <= 0) {
+            $result['status'] = false;
+            $result['message'] = "Ticket types have not found!";
+            die(json_encode($result));
+        }
+       
         $arrQr = $this->cutQrcode($params["qrcode"]);
         if (!isset($params['used'])) {
             $params['used'] = "20".$arrQr['YY']."-".$arrQr['MM']."-".$arrQr['DD']." ".$arrQr['HH'].":".$arrQr['mm'].":".$arrQr['ss'];
@@ -232,30 +257,68 @@ class ServerApiController extends AppController
         if (!isset($params['is_used'])) {
             $params['is_used'] = 0;
         }
-        $busTicketsTable  = TableRegistry::get('bus_tickets');
+        
         $busTicketsEntity = $busTicketsTable->newEntity();
         $busTicketsEntity->ticket_price_id = $params['tt'];
+
         if ($params['type'] == 0) {
             $busTicketsEntity->bus_id = $params['id'];
             $busTicketsEntity->portable_machine_id = 0;
-        } else {
+            $countBus = $busesTable->find()->where(['id' => $params['id']])->count();
+            if ($countBus <= 0) {
+                $result['status'] = false;
+                $result['message'] = "Buses have not found!";
+                die(json_encode($result));
+            }
+        } else if ($params['type'] == 1) {
             $busTicketsEntity->bus_id = 0;
             $busTicketsEntity->portable_machine_id = $params['id'];
+            $countPortableMachine = $portableMachinesTable->find()->where(['id' => $params['id']])->count();
+            if ($countPortableMachine <= 0) {
+                $result['status'] = false;
+                $result['message'] = "Portable Machines have not found!";
+                die(json_encode($result));
+            }
+        } else {
+            $result['status'] = false;
+            die(json_encode($result));
+        }
+        if ($busTicketsTable->find()->where(['ticket_number' => $params['qrcode']])->count() > 0) {
+            $result['status'] = false;
+            $result['message'] = "qrcode already exists";
+            die(json_encode($result));
         }
         $busTicketsEntity->ticket_number = $params['qrcode'];
         $busTicketsEntity->is_used = $params['is_used'];
         $busTicketsEntity->used = $params['used'];
-
-        return $busTicketsTable->save($busTicketsEntity);
+        if ($busTicketsTable->save($busTicketsEntity)) {
+            return true;
+        } else {
+            $result['status'] = false;
+            die(json_encode($result));
+        }
     }
 
     private function updateLatLong($data)
     {
         $table = TableRegistry::get($data['nameTable']);
         $entity = $table->get($data['id']);
-        $entity->longtitude = $data['longtitude'];
-        $entity->latitude = $data['latitude'];
-        $table->save($entity);
+        if (is_numeric($data['longtitude'])) {
+            $entity->longtitude = str_replace(",","",$data['longtitude']);
+        } else {
+            $entity->longtitude = $entity->longtitude;
+        }
+        if (is_numeric($data['latitude'])) {
+            $entity->latitude = str_replace(",","",$data['latitude']);
+        } else {
+            $entity->latitude = $entity->latitude;
+        }
+        if ($table->save($entity)) {
+            return true;
+        } else {
+            $result['status'] = false;
+            die(json_encode($result));
+        }        
     }
 
     private function responseResult($flag)
@@ -270,25 +333,40 @@ class ServerApiController extends AppController
 
     private function cutQrcode($qrcode)
     {
-        if (strlen($qrcode) != 30) {
-            die('test');
-        }
-        // 011001171234120854712901174500
-        $arr['version'] = (int)substr($qrcode, 0, 2);   // 01
-        $arr['type'] = (int)substr($qrcode, 2, 1);      // 1
-        $arr['id'] = (int)substr($qrcode, 3, 3);        // 001
-        $arr['YY'] = (int)substr($qrcode, 6, 2);        // 17
-        $arr['nr'] = (int)substr($qrcode, 8, 4);             // 1234
-        $arr['MM'] = (int)substr($qrcode, 12, 2);            // 12
-        $arr['code'] = (int)substr($qrcode, 14, 6);          // 085471
-        $arr['DD'] = (int)substr($qrcode, 20, 2);            // 29
-        $arr['tt'] = (int)substr($qrcode, 22, 2);            // 01
-        $arr['HHMMss'] = (int)substr($qrcode, 24, 6);        // 174500
+        if (strlen($qrcode) == 30 ) {
+            if (is_numeric($qrcode)) {
+                // 011001171234120854712901174500
+                $arr['version'] = (int)substr($qrcode, 0, 2);   // 01
+                $arr['type'] = (int)substr($qrcode, 2, 1);      // 1
+                $arr['id'] = (int)substr($qrcode, 3, 3);        // 001
+                $arr['YY'] = (int)substr($qrcode, 6, 2);        // 17
+                $arr['nr'] = (int)substr($qrcode, 8, 4);        // 1234
+                $arr['MM'] = (int)substr($qrcode, 12, 2);       // 12
+                $arr['code'] = (int)substr($qrcode, 14, 6);     // 085471
+                $arr['DD'] = (int)substr($qrcode, 20, 2);       // 29
+                $arr['tt'] = (int)substr($qrcode, 22, 2);       // 01
+                $arr['HHMMss'] = (int)substr($qrcode, 24, 6);   // 174500
 
-        $arr['HH'] = (int)substr($qrcode, 24, 2);
-        $arr['mm'] = (int)substr($qrcode, 26, 2);
-        $arr['ss'] = (int)substr($qrcode, 28, 2);
-        return $arr;
+                $arr['HH'] = (int)substr($qrcode, 24, 2);
+                $arr['mm'] = (int)substr($qrcode, 26, 2);
+                $arr['ss'] = (int)substr($qrcode, 28, 2);
+                return $arr;
+            } else {
+                $result['status'] = false;
+                $result['message'] = "qrcode incorrect!";
+                die(json_encode($result));
+            }
+            
+            
+        } else if (strlen($qrcode) == 40) {
+            $result['status'] = false;
+            $result['message'] = "Think!";
+            die(json_encode($result));
+        } else {
+            $result['status'] = false;
+            $result['message'] = "qrcode incorrect!";
+            die(json_encode($result));
+        }
     }
 
 }
