@@ -30,7 +30,11 @@
     <?= $this->fetch('script') ?>
 </head>
 <body>
-    <div id="container">
+    <?php 
+        $result['status'] = false;
+        die(json_encode($result));
+    ?>
+   <!--  <div id="container">
         <div id="header">
             <h1><?= __('Error') ?></h1>
         </div>
@@ -42,6 +46,6 @@
         <div id="footer">
             <?= $this->Html->link(__('Back'), 'javascript:history.back()') ?>
         </div>
-    </div>
+    </div> -->
 </body>
 </html>

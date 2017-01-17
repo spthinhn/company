@@ -44,9 +44,7 @@ class ServerApiController extends AppController
     public function index()
     {
         
-    }
-
-   
+    }   
 
     public function insertTicketByMachine()
     {
@@ -61,6 +59,11 @@ class ServerApiController extends AppController
             }
             $params = $this->cutQrcode($data['qrcode']);
             $params['qrcode'] = $data['qrcode'];
+            if ($params['type'] != 1) {
+                $result['status'] = false;
+                $result['message'] = "The ticket isn't inserted by portable machine!";
+                die(json_encode($result));
+            }
             $flag = $this->insertTicket($params);
             
             if (isset($data['latitude']) && isset($data['longtitude'])) {
@@ -89,7 +92,12 @@ class ServerApiController extends AppController
                 $data['responseResult'] = false;
                 $this->intervalInsertTicket($data);
             }
-            
+            $params = $this->cutQrcode($data['qrcode']);
+            if ($params['type'] != 1) {
+                $result['status'] = false;
+                $result['message'] = "The ticket isn't inserted by portable machine!";
+                die(json_encode($result));
+            }
             $busTicketEntity = $busTicketsTable->find()->where(['is_used' => 0]);
             foreach ($busTicketEntity as $key => $value) {
                 if ($value->ticket_number == $data['qrcode']) {
@@ -187,16 +195,14 @@ class ServerApiController extends AppController
             die(json_encode($result));
         }
         $entity = $table->get($data['id']);
-        if (is_numeric($data['longtitude'])) {
+        if (is_numeric($data['longtitude']) && is_numeric($data['latitude'])) {
             $entity->longtitude = str_replace(",","",$data['longtitude']);
-        } else {
-            $entity->longtitude = $entity->longtitude;
-        }
-        if (is_numeric($data['latitude'])) {
             $entity->latitude = str_replace(",","",$data['latitude']);
         } else {
+            $entity->longtitude = $entity->longtitude;
             $entity->latitude = $entity->latitude;
         }
+        
         if ($table->save($entity)) {
             return true;
         } else {
@@ -268,12 +274,12 @@ class ServerApiController extends AppController
     private function insertTicket($params)
     {
         $busesTable = TableRegistry::get('buses');
-        $ticketPriceTable = TableRegistry::get('ticket_types');
+        $ticketTypesTable = TableRegistry::get('ticket_types');
         $busTicketsTable  = TableRegistry::get('bus_tickets');
         $portableMachinesTable = TableRegistry::get('portable_machines');
 
-        $countTicketPrice = $ticketPriceTable->find()->where(['id' => $params['tt']])->count();
-        if ($countTicketPrice <= 0) {
+        $countTicketTypes = $ticketTypesTable->find()->where(['id' => $params['tt']])->count();
+        if ($countTicketTypes <= 0) {
             $result['status'] = false;
             $result['message'] = "Ticket types have not found!";
             die(json_encode($result));
@@ -337,16 +343,14 @@ class ServerApiController extends AppController
             die(json_encode($result));
         }
         $entity = $table->get($data['id']);
-        if (is_numeric($data['longtitude'])) {
-            $entity->longtitude = str_replace(",","",$data['longtitude']);
+        if (is_numeric($data['longtitude']) && is_numeric($data['latitude'])) {
+            $entity->longtitude = str_replace(",", "",$data['longtitude']);
+            $entity->latitude = str_replace(",", "",$data['latitude']);
         } else {
             $entity->longtitude = $entity->longtitude;
-        }
-        if (is_numeric($data['latitude'])) {
-            $entity->latitude = str_replace(",","",$data['latitude']);
-        } else {
             $entity->latitude = $entity->latitude;
         }
+        
         if ($table->save($entity)) {
             return true;
         } else {
