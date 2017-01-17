@@ -54,15 +54,22 @@ class ServerApiController extends AppController
         $flag = false;
         if ($this->request->is('post')) {
             $data = $this->request->data;
+            if (!isset($data['qrcode'])) {
+                $result['status'] = false;
+                $result['message'] = "qrcode have not found!";
+                die(json_encode($result));
+            }
             $params = $this->cutQrcode($data['qrcode']);
             $params['qrcode'] = $data['qrcode'];
             $flag = $this->insertTicket($params);
             
-            $arrUpdate['nameTable'] = "portable_machines";
-            $arrUpdate['id'] = $params['id'];
-            $arrUpdate['latitude'] = $data['latitude'];
-            $arrUpdate['longtitude'] = $data['longtitude'];
-            $this->updateLatLong($arrUpdate);
+            if (isset($data['latitude']) && isset($data['longtitude'])) {
+                $arrUpdate['nameTable'] = "portable_machines";
+                $arrUpdate['id'] = $params['id'];
+                $arrUpdate['latitude'] = $data['latitude'];
+                $arrUpdate['longtitude'] = $data['longtitude'];
+                $this->updateLatLong($arrUpdate);
+            }
         } 
         $this->responseResult($flag);
     }
@@ -73,7 +80,11 @@ class ServerApiController extends AppController
         if ($this->request->is('post')) {
             $busTicketsTable        = TableRegistry::get('bus_tickets');
             $data = $this->request->data();
-
+            if (!isset($data['qrcode'])) {
+                $result['status'] = false;
+                $result['message'] = "qrcode have not found!";
+                die(json_encode($result));
+            }
             if (isset($data['arrQR'])) {
                 $data['responseResult'] = false;
                 $this->intervalInsertTicket($data);
@@ -85,6 +96,10 @@ class ServerApiController extends AppController
                     $busTicketEntity = $busTicketsTable->get($value->id);
                     $busTicketEntity->is_used = 1;
                     $busTicketsTable->save($busTicketEntity);
+                    if (isset($data['busId'])) {
+                        $data['id'] = $data['busId'];
+                        $this->updateLatLongBus($data);
+                    }
                     $flag = true;
                     break;
                 }
@@ -98,12 +113,13 @@ class ServerApiController extends AppController
         $flag = false;
         if ($this->request->is('post')) {
             $data = $this->request->data();
-            $data = $this->getIdStaff($data);
-            $this->checkInOut($data);
-            $flag = true;
+            if (isset($data['rfId']) && isset($data['busId'])) {
+                $data = $this->getIdStaff($data);
+                $this->checkInOut($data);
+                $flag = true;
+            }
         }
-        $this->responseResult($flag);
-        
+        $this->responseResult($flag);      
     }
 
     public function updateBusPosition()
@@ -111,14 +127,16 @@ class ServerApiController extends AppController
         $flag = false;
         if ($this->request->is('post')) {
             $data = $this->request->data();
-            if (isset($data['arrQR'])) {
-                $data['responseResult'] = false;
-                $this->intervalInsertTicket($data);
-                $flag = true;
-            } else {
-                $data['id'] = $data['busId'];
-                $this->updateLatLongBus($data);
-                $flag = true;
+            if (isset($data['busId'])) {
+                if (isset($data['arrQR'])) {
+                    $data['responseResult'] = false;
+                    $this->intervalInsertTicket($data);
+                    $flag = true;
+                } else {
+                    $data['id'] = $data['busId'];
+                    $this->updateLatLongBus($data);
+                    $flag = true;
+                }
             }
         }
         $this->responseResult($flag);   
@@ -162,6 +180,12 @@ class ServerApiController extends AppController
     private function updateLatLongBus($data)
     {
         $table = TableRegistry::get('buses');
+        $count = $table->find()->where(['id' => $data['id']])->count();
+        if ($count <= 0) {
+            $result['status'] = false;
+            $result['message'] = "Buses have not found!";
+            die(json_encode($result));
+        }
         $entity = $table->get($data['id']);
         if (is_numeric($data['longtitude'])) {
             $entity->longtitude = str_replace(",","",$data['longtitude']);
@@ -185,6 +209,11 @@ class ServerApiController extends AppController
     {
         $staffTable = TableRegistry::get('staffs');
         $staffEntity = $staffTable->findByRfid($data['rfId']);
+        if ($staffEntity->count() <= 0) {
+            $result['status'] = false;
+            $result['message'] = "Staffs have not found!";
+            die(json_encode($result));
+        }
         foreach ($staffEntity as $key => $value) {
             $data['staffId'] = $value->id;
         }
@@ -302,6 +331,11 @@ class ServerApiController extends AppController
     private function updateLatLong($data)
     {
         $table = TableRegistry::get($data['nameTable']);
+        $count = $table->find()->where(['id' => $data['id']])->count();
+        if ($count <= 0) {
+            $result['status'] = false;
+            die(json_encode($result));
+        }
         $entity = $table->get($data['id']);
         if (is_numeric($data['longtitude'])) {
             $entity->longtitude = str_replace(",","",$data['longtitude']);
@@ -333,23 +367,37 @@ class ServerApiController extends AppController
 
     private function cutQrcode($qrcode)
     {
+        $qrcode = preg_replace('/[^a-zA-Z0-9\']/', '', $qrcode);
+        $qrcode = str_replace("'", '', $qrcode);
         if (strlen($qrcode) == 30 ) {
             if (is_numeric($qrcode)) {
-                // 011001171234120854712901174500
+                // 011001171234010854711701174500
                 $arr['version'] = (int)substr($qrcode, 0, 2);   // 01
                 $arr['type'] = (int)substr($qrcode, 2, 1);      // 1
                 $arr['id'] = (int)substr($qrcode, 3, 3);        // 001
                 $arr['YY'] = (int)substr($qrcode, 6, 2);        // 17
                 $arr['nr'] = (int)substr($qrcode, 8, 4);        // 1234
-                $arr['MM'] = (int)substr($qrcode, 12, 2);       // 12
+                $arr['MM'] = (int)substr($qrcode, 12, 2);       // 01
                 $arr['code'] = (int)substr($qrcode, 14, 6);     // 085471
-                $arr['DD'] = (int)substr($qrcode, 20, 2);       // 29
+                $arr['DD'] = (int)substr($qrcode, 20, 2);       // 17
                 $arr['tt'] = (int)substr($qrcode, 22, 2);       // 01
                 $arr['HHMMss'] = (int)substr($qrcode, 24, 6);   // 174500
 
                 $arr['HH'] = (int)substr($qrcode, 24, 2);
                 $arr['mm'] = (int)substr($qrcode, 26, 2);
                 $arr['ss'] = (int)substr($qrcode, 28, 2);
+
+                if ($arr['YY'] != (int)date('y') || $arr['MM'] != (int)date('m') || $arr['DD'] != (int)date('d')) {
+                    $result['status'] = false;
+                    $result['message'] = "qrcode incorrect!";
+                    die(json_encode($result));
+                }
+
+                if ($arr['HH'] > 23 || $arr['mm'] > 59 || $arr['ss'] > 59) {
+                    $result['status'] = false;
+                    $result['message'] = "qrcode incorrect!";
+                    die(json_encode($result));
+                }
                 return $arr;
             } else {
                 $result['status'] = false;
