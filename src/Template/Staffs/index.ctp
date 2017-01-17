@@ -4,7 +4,7 @@
             <div class="row">
 				<div class="col-xs-12">
 					<div class="page-title-box">
-                        <h4 class="page-title ">Quản lý</h4>
+                        <h4 class="page-title ">Staffs</h4>
                         <ol class="breadcrumb p-0">
                             <li>
                                 <a href="#">Uplon</a>
@@ -26,11 +26,15 @@
                 <div class="col-sm-12">
                     <div class="card-box">
                     	<div class="col-sm-8">
-                        	<h4 class="m-t-0 header-title"><b>Thành viên</b></h4>
                         </div>
                         <div class="col-sm-4">
-                        	<button class="btn waves-effect waves-light btn-default btn-sm pull-right"> <i class="fa fa-plus"></i> </button>
+                            <a href="<?php echo $this->Url->build(array('controller'=>'Staffs','action'=>'add')) ?>">
+                                <button class="btn waves-effect waves-light btn-default pull-right">
+                                    <i class="fa fa-plus fa-lg"></i>
+                                </button>
+                            </a>
                         </div>
+                        
                         <div class="clearfix"></div>
                         <hr>
                         <table class="tablesaw table m-b-0 table-bordered table-hover" data-tablesaw-sortable >

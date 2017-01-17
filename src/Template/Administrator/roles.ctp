@@ -4,7 +4,7 @@
             <div class="row">
 				<div class="col-xs-12">
 					<div class="page-title-box">
-                        <h4 class="page-title ">Quản lý</h4>
+                        <h4 class="page-title ">Manager Roles</h4>
                         <ol class="breadcrumb p-0">
                             <li>
                                 <a href="#">Uplon</a>

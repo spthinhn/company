@@ -66,6 +66,7 @@ Router::scope('/', function (RouteBuilder $routes) {
     $routes->connect('/administrator/users', ['controller' => 'Administrator', 'action' => 'users']);
     $routes->connect('/administrator/user/:id', ['controller' => 'Administrator', 'action' => 'user', 'id' => '[0-9]+']);
     $routes->connect('/administrator/users/add', ['controller' => 'Administrator', 'action' => 'addUser']);
+    $routes->connect('/administrator/users/edit', ['controller' => 'Administrator', 'action' => 'editUser']);
     
     $routes->connect('/administrator/roles', ['controller' => 'Administrator', 'action' => 'roles']);
     $routes->connect('/administrator/roles/add', ['controller' => 'Administrator', 'action' => 'addRole']);

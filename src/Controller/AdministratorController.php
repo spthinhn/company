@@ -13,7 +13,8 @@ use Cake\View\View;
 use Cake\I18n\Date;
 use Cake\I18n\Time;
 
-class AdministratorController extends AppController{
+class AdministratorController extends AppController
+{
 	public function initialize(){
 		$arrCSS1 = array(
 			'plugins/morris/morris.css',
@@ -68,20 +69,70 @@ class AdministratorController extends AppController{
 
 	public function users()
 	{
-
+		$usersTable = TableRegistry::get('users');
+		$rolesTable = TableRegistry::get('roles');
+		$userEntity = $usersTable->find()->contain(['Roles']);
+		$this->set("users", $userEntity);
 	}
 
 	public function addUser()
 	{
 		$usersTable = TableRegistry::get('users');
+		$rolesTable = TableRegistry::get('roles');
+		$roles = $rolesTable->find();
+		$this->set("roles", $roles);
 		if ($this->request->is('post')) {
 			$data = $this->request->data;
+			$countUser = $usersTable->find()->where(['username' => $data['username']])->orWhere(['email' => $data['email']])->count();
+			if ($countUser > 0) {
+				
+			}
+			if (!isset($data['username']) || !isset($data['password'])) {
+				$this->redirect(
+			        array('controller' => 'Administrator', 'action' => 'users')
+			    );
+			}
+			
 
-			$userEntity = $usersTable->newEntity();
+			if ($data['password'] == $data['passConfirm']) {
+				$userEntity = $usersTable->newEntity();
+				$userEntity->username = $data['username'];
+				$userEntity->passsalt = $this->generatePassSalt(10);
+				$passHash = $userEntity->passsalt.$data['password'];
+				$userEntity->password = hash('sha512', $passHash);
+				$userEntity->email = $data['email'];
+				$userEntity->role_id = $data['roleId'];
+				$userEntity->created = date('Y-m-d H:i:s', time());
+				$usersTable->save($userEntity);
+				$this->redirect(
+			        array('controller' => 'Administrator', 'action' => 'users')
+			    );
+			}
+			
+		}
+	}
 
-			$this->redirect(
-		        array('controller' => 'Administrator', 'action' => 'users')
-		    );
+	public function editUser($id)
+	{
+		$usersTable = TableRegistry::get('users');
+		$rolesTable = TableRegistry::get('roles');
+		$roles = $rolesTable->find();
+		$this->set("roles", $roles);
+
+		$user = $usersTable->find()->contain(['Roles'])->where('users.id', $id)->first();
+		$this->set("user", $user);
+		if ($this->request->is('post')) {
+			$data = $this->request->data;
+			$userEntity = $usersTable->get($id);
+			$userEntity->email = $data['email'];
+			$userEntity->role_id = $data['roleId'];
+			$countEmail = $usersTable->find()->where('email', $data['email'])->count();
+			if ($countEmail <= 0) {
+				$usersTable->save($userEntity);
+				$this->redirect(
+			        array('controller' => 'Administrator', 'action' => 'users')
+			    );
+			}
 		}
 	}
 
@@ -143,7 +194,19 @@ class AdministratorController extends AppController{
 	    );
 	}
 /* end Roles */
+	
+	private function generatePassSalt($length)
+	{
+		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"; 
+		$size = strlen( $chars );
+		$str = '';
+		for( $i = 0; $i < $length; $i++ ) {
+			$str .= $chars[ rand( 0, $size - 1 ) ];
+		}
+		return $str;
+	}
 
+	
 }
 
 	

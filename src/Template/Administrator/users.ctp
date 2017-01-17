@@ -4,7 +4,7 @@
             <div class="row">
 				<div class="col-xs-12">
 					<div class="page-title-box">
-                        <h4 class="page-title ">Quản lý</h4>
+                        <h4 class="page-title ">Manager Members</h4>
                         <ol class="breadcrumb p-0">
                             <li>
                                 <a href="#">Uplon</a>
@@ -26,7 +26,6 @@
                 <div class="col-sm-12">
                     <div class="card-box">
                         <div class="col-sm-8">
-                            <h4 class="m-t-0 header-title"><b>Members</b></h4>
                         </div>
                         <div class="col-sm-4">
                             <a href="<?php echo $this->Url->build(array('controller'=>'Administrator','action'=>'addUser')) ?>">
@@ -42,37 +41,30 @@
                                 <tr>
 
                                     <th width="5%" scope="col" data-tablesaw-sortable-col data-tablesaw-priority="1">#</th>
-                                    <th width="20%" scope="col" data-tablesaw-sortable-col data-tablesaw-sortable-default-col data-tablesaw-priority="2">Username</th>
-                                    <th width="20%" scope="col" data-tablesaw-sortable-col data-tablesaw-priority="3">Email</th>
-                                    <th width="20%" scope="col" data-tablesaw-sortable-col data-tablesaw-priority="4">Chức vụ</th>
-                                    <th width="20%" scope="col" data-tablesaw-sortable-col data-tablesaw-priority="5">Trạng thái</th>
+                                    <th width="30%" scope="col" data-tablesaw-sortable-col data-tablesaw-sortable-default-col data-tablesaw-priority="2">Username</th>
+                                    <th width="30%" scope="col" data-tablesaw-sortable-col data-tablesaw-priority="3">Email</th>
+                                    <th width="20%" scope="col" data-tablesaw-sortable-col data-tablesaw-priority="4">Role</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
+                            <?php $i = 0 ?>
+                            <?php foreach ($users as $key => $value) { ?>
+                            <?php $i++ ?>
                                 <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>Otto</td>
-                                    <td>Otto</td>
+                                    <th scope="row"><?php echo $i ?></th>
+                                    <td><?php echo $value->username ?></td>
+                                    <td><?php echo $value->email ?></td>
+                                    <td><?php echo $value->role->name ?></td>
                                     <td>
-                                    <button class="btn waves-effect waves-light btn-info btn-sm"> <i class="fa fa-info"></i> </button>
-                                    <button class="btn waves-effect waves-light btn-warning btn-sm"> <i class="fa fa-cog"></i> </button>
+                                        <a href="<?php echo $this->Url->build(array('controller'=>'Administrator','action'=>'editUser', $value->id )) ?>">
+                                            <button class="btn waves-effect waves-light btn-warning btn-sm pull-right">
+                                                <i class="fa fa-cog"></i>
+                                            </button>
+                                        </a>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>Otto</td>
-                                    <td>Otto</td>
-                                    <td>
-                                    <button class="btn waves-effect waves-light btn-info btn-sm"> <i class="fa fa-info"></i> </button>
-                                    <button class="btn waves-effect waves-light btn-warning btn-sm"> <i class="fa fa-cog"></i> </button>
-                                    </td>
-                                </tr>
-                                
+                            <?php } ?>
                             </tbody>
                         </table>
                     </div>
