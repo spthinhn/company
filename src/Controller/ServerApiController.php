@@ -105,8 +105,10 @@ class ServerApiController extends AppController
                     $busTicketEntity->is_used = 1;
                     $busTicketsTable->save($busTicketEntity);
                     if (isset($data['busId'])) {
-                        $data['id'] = $data['busId'];
-                        $this->updateLatLongBus($data);
+                        if (is_numeric($data['busId'])) {
+                            $data['id'] = $data['busId'];
+                            $this->updateLatLongBus($data);
+                        }
                     }
                     $flag = true;
                     break;
@@ -122,9 +124,11 @@ class ServerApiController extends AppController
         if ($this->request->is('post')) {
             $data = $this->request->data();
             if (isset($data['rfId']) && isset($data['busId'])) {
-                $data = $this->getIdStaff($data);
-                $this->checkInOut($data);
-                $flag = true;
+                if (is_numeric($data['busId']) && is_numeric($data['rfId'])) {
+                    $data = $this->getIdStaff($data);
+                    $this->checkInOut($data);
+                    $flag = true;
+                }
             }
         }
         $this->responseResult($flag);      
@@ -157,8 +161,10 @@ class ServerApiController extends AppController
             $data = $this->request->data();
             $data['nameTable'] = "portable_machines";
             $data['id'] = $data['machineId'];
-            $this->updateLatLong($data);
-            $flag = true;
+            if (is_numeric($data['id'])) {
+                $this->updateLatLong($data);
+                $flag = true;
+            }
         }
         $this->responseResult($flag);
     }
